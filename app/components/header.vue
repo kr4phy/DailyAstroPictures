@@ -5,9 +5,14 @@ const route = useRoute()
 
 const items = computed<NavigationMenuItem[]>(() => [
   {
-    label: 'Explore',
+    label: 'Today',
     to: '/',
     active: route.path === '/'
+  },
+  {
+    label: 'Explore',
+    to: '/explore',
+    active: route.path.startsWith('/explore')
   },
   {
     label: 'Starred Items',
@@ -19,6 +24,11 @@ const items = computed<NavigationMenuItem[]>(() => [
     to: '/mygallery',
     active: route.path.startsWith('/mygallery')
   },
+  {
+    label: 'Settings',
+    to: '/settings',
+    active: route.path.startsWith('/settings')
+  }
 ])
 </script>
 
