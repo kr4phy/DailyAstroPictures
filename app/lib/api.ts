@@ -20,7 +20,16 @@ type apodData = {
     "isStarred": boolean
 }
 
-export const getAPODData = async (date: string): Promise<apodData> => {
+type apiError = {
+    "error": errResponse
+}
+
+type errResponse = {
+    "code": string,
+    "message": string
+}
+
+export const getAPODData = async (date: string = ''): Promise<apodData | apiError> => {
     if (import.meta.client) {
         const stored = localStorage.getItem(`apod-${date}`);
         if (stored) {
@@ -33,6 +42,10 @@ export const getAPODData = async (date: string): Promise<apodData> => {
     const runtimeConfig = useRuntimeConfig();
     const apiKey = runtimeConfig.public.apodApiKey;
     const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${apiKey}&date=${date}`);
+    if(response.status !== 200) {
+        const errorData: apiError = await response.json();
+        return errorData;
+    }
     const rawData: rawApodApiData = await response.json();
     const data: apodData = { ...rawData, isStarred: false };
     setAPODData(data);
@@ -83,6 +96,9 @@ export const getCurrentDate = (): string => {
 
 export async function downloadImage(date: string) {
     const data = await getAPODData(date);
+    if ('error' in data) {
+        throw new Error(data.error.message);
+    }
     const buffer = await $fetch<ArrayBuffer>(data.hdurl, { responseType: 'arrayBuffer' });
     const encodedImage = window.btoa(String.fromCharCode(...new Uint8Array(buffer)));
 

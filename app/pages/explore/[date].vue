@@ -2,7 +2,7 @@
 import { getAPODData, setAPODData } from '~/lib/api';
 
 const route = useRoute()
-const data = await getAPODData()
+const data = await getAPODData(route.params.date as string)
 const apiOk = ('date' in data)
 const imageLoading = ref(true);
 
@@ -46,7 +46,7 @@ if (!apiOk) {
     <UPage>
         <UPageHeader>
             <template #title>
-                Today's APOD
+                {{ $route.params.date }}'s APOD
             </template>
         </UPageHeader>
         <UPageBody>
