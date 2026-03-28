@@ -1,5 +1,4 @@
 <script setup lang="ts">
-<<<<<<< HEAD
 import {
   clearSessionApiKey,
   clearStoredEncryptedApiKey,
@@ -301,16 +300,3 @@ onMounted(async () => {
     </UPageBody>
   </UPage>
 </template>
-=======
-</script>
-
-<template>
-    <UPage>
-        <UPageHeader title="Settings" />
-        <UPageBody>
-            <ClientOnly>
-            </ClientOnly>
-        </UPageBody>
-    </UPage>
-</template>
->>>>>>> d228d148ad0e71956667bdfd6630275818966cc1
