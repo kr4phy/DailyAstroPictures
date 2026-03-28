@@ -1,5 +1,6 @@
 import { getSessionApiKey } from './byok';
 
+<<<<<<< HEAD
 type RawApodApiData = {
   date: string;
   explanation: string;
@@ -8,6 +9,50 @@ type RawApodApiData = {
   service_version: string;
   title: string;
   url: string;
+=======
+type apodData = {
+    "date": string,
+    "explanation": string,
+    "hdurl": string,
+    "media_type": string,
+    "service_version": string,
+    "title": string,
+    "url": string,
+    "encodedImage"?: string,
+    "isStarred": boolean
+}
+
+type apiError = {
+    "error": errResponse
+}
+
+type errResponse = {
+    "code": string,
+    "message": string
+}
+
+export const getAPODData = async (date: string = ''): Promise<apodData | apiError> => {
+    if (import.meta.client) {
+        const stored = localStorage.getItem(`apod-${date}`);
+        if (stored) {
+            const localData = JSON.parse(stored);
+            if (localData.date === date) {
+                return localData;
+            }
+        }
+    }
+    const runtimeConfig = useRuntimeConfig();
+    const apiKey = runtimeConfig.public.apodApiKey;
+    const response = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${apiKey}&date=${date}`);
+    if(response.status !== 200) {
+        const errorData: apiError = await response.json();
+        return errorData;
+    }
+    const rawData: rawApodApiData = await response.json();
+    const data: apodData = { ...rawData, isStarred: false };
+    setAPODData(data);
+    return data;
+>>>>>>> d228d148ad0e71956667bdfd6630275818966cc1
 };
 
 export type ApodData = {
@@ -290,11 +335,21 @@ export const getCurrentDate = (): string => {
   return `${year}-${month}-${day}`;
 };
 
+<<<<<<< HEAD
 export const getDownloadedDates = (): string[] => getIndex(INDEX_KEYS.downloaded);
 export const getStarredDates = (): string[] => getIndex(INDEX_KEYS.starred);
 export const getViewedDates = (): string[] => getIndex(INDEX_KEYS.viewed);
 export const getBrowserSavedDates = (): string[] => getIndex(INDEX_KEYS.browserSaved);
 export const isDateBrowserSaved = (date: string): boolean => getBrowserSavedDates().includes(date);
+=======
+export async function downloadImage(date: string) {
+    const data = await getAPODData(date);
+    if ('error' in data) {
+        throw new Error(data.error.message);
+    }
+    const buffer = await $fetch<ArrayBuffer>(data.hdurl, { responseType: 'arrayBuffer' });
+    const encodedImage = window.btoa(String.fromCharCode(...new Uint8Array(buffer)));
+>>>>>>> d228d148ad0e71956667bdfd6630275818966cc1
 
 export const markBrowserSaved = (date: string): void => {
   addToIndex(INDEX_KEYS.browserSaved, date);
