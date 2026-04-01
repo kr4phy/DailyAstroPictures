@@ -16,6 +16,7 @@ const route = useRoute();
 const targetDate = route.params.date as string;
 const data = await getAPODData(targetDate);
 const today = new Date();
+const inputDate = useTemplateRef('inputDate');
 const minDate = new CalendarDate(1995, 6, 16);
 const maxDate = new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
 
@@ -77,9 +78,7 @@ const toDatePath = (value: CalendarDate): string => {
   return `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`;
 };
 
-const navigateToSelectedDate = () => {
-  void navigateTo(`/explore/${toDatePath(modelValue.value)}`);
-};
+const selectedDatePath = computed(() => `/explore/${toDatePath(modelValue.value)}`);
 
 const generateRandomDate = () => {
   const start = new Date(1995, 5, 16).getTime();
@@ -128,11 +127,27 @@ const apodData = computed<ApodData | null>(() => ('date' in data ? data : null))
     <UPageBody>
       <ClientOnly>
         <div class="mb-4 flex flex-wrap items-center gap-2">
-          <UInputDate v-model="modelValue" :min-value="minDate" :max-value="maxDate" />
+          <UInputDate ref="inputDate" v-model="modelValue" :min-value="minDate">
+            <template #trailing>
+              <UPopover :reference="inputDate?.inputsRef[3]?.$el">
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  icon="i-lucide-calendar"
+                  aria-label="Select a date"
+                  class="px-0"
+                />
+                <template #content>
+                  <UCalendar v-model="modelValue" class="p-2" />
+                </template>
+              </UPopover>
+            </template>
+          </UInputDate>
           <UButton color="neutral" variant="outline" trailing-icon="i-lucide-shuffle" @click="generateRandomDate">
             Random Date
           </UButton>
-          <UButton color="primary" @click="navigateToSelectedDate">
+          <UButton color="primary" :to="selectedDatePath">
             View
           </UButton>
         </div>
