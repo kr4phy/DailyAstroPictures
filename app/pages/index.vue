@@ -12,7 +12,7 @@ import {
 } from '~/lib/api';
 import { showApodLoadErrorToast, showImageRemovedToast } from '~/lib/apod-feedback';
 
-const data = await getAPODData();
+const data = reactive(await getAPODData());
 const imageLoading = ref(true);
 const downloadModalOpen = ref(false);
 const localImageUrl = ref<string | null>(null);
@@ -35,14 +35,16 @@ if ('error' in data) {
     const toast = useToast();
     showApodLoadErrorToast(toast, data);
   }
-} else {
-  const isStarred = ref(!!data.isStarred);
-
-  watch(isStarred, (newValue) => {
-    data.isStarred = newValue;
-    setAPODData(data);
-  });
 }
+
+const updateStarred = (next: boolean) => {
+  if (!('date' in data)) {
+    return;
+  }
+
+  data.isStarred = next;
+  setAPODData(data);
+};
 
 const handleDownloadComplete = ({
   dataUrl,
@@ -80,7 +82,8 @@ const toggleStar = () => {
   if (!('date' in data)) {
     return;
   }
-  data.isStarred = !data.isStarred;
+
+  updateStarred(!data.isStarred);
 };
 
 const apodData = computed<ApodData | null>(() => ('date' in data ? data : null));

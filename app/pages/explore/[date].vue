@@ -14,7 +14,7 @@ import { showApodLoadErrorToast, showImageRemovedToast } from '~/lib/apod-feedba
 
 const route = useRoute();
 const targetDate = route.params.date as string;
-const data = await getAPODData(targetDate);
+const data = reactive(await getAPODData(targetDate));
 const today = new Date();
 const inputDate = useTemplateRef('inputDate');
 const minDate = new CalendarDate(1995, 6, 16);
@@ -52,14 +52,16 @@ if ('error' in data) {
     const toast = useToast();
     showApodLoadErrorToast(toast, data);
   }
-} else {
-  const isStarred = ref(!!data.isStarred);
-
-  watch(isStarred, (newValue) => {
-    data.isStarred = newValue;
-    setAPODData(data);
-  });
 }
+
+const updateStarred = (next: boolean) => {
+  if (!('date' in data)) {
+    return;
+  }
+
+  data.isStarred = next;
+  setAPODData(data);
+};
 
 const handleDownloadComplete = ({
   dataUrl,
@@ -111,7 +113,8 @@ const toggleStar = () => {
   if (!('date' in data)) {
     return;
   }
-  data.isStarred = !data.isStarred;
+
+  updateStarred(!data.isStarred);
 };
 
 const apodData = computed<ApodData | null>(() => ('date' in data ? data : null));
